@@ -1,0 +1,992 @@
+/* ============================================================
+   CONCLUSION — HUISSTIJL CSS
+   Gebaseerd op de officiële Brandguide Oktober 2025
+   Vragen? marcom@conclusion.nl
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700&family=Source+Serif+4:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+/* ============================================================
+   1. CSS DESIGN TOKENS
+   ============================================================ */
+
+:root {
+
+  /* ----------------------------------------------------------
+     BASISKLEUREN (Corporate Conclusion)
+     ---------------------------------------------------------- */
+  --color-zwart:          #000000;   /* Conclusion Zwart   | CMYK 40/30/30/100 */
+  --color-wit:            #ffffff;   /* Conclusion Wit     | CMYK 0/0/0/0      */
+  --color-magenta:        #bc448c;   /* Conclusion Magenta | CMYK 10/85/0/0    */
+  --color-magenta-10:     #f5e0ee;   /* Magenta 10% — badges/accenten           */
+
+  /* ----------------------------------------------------------
+     CANVASKLEUREN (steunkleuren & domeinen)
+     ---------------------------------------------------------- */
+  --color-rood:           #c83737;   /* Conclusion Rood  | CMYK 0/90/80/0  */
+  --color-rood-10:        #f9ebeb;
+  --color-cyaan:          #0097b2;   /* Conclusion Cyaan | CMYK 80/5/20/0  */
+  --color-cyaan-10:       #e5f5f7;
+  --color-blauw:          #1369af;   /* Conclusion Blauw | CMYK 100/50/0/0 */
+  --color-blauw-10:       #e7f0f7;
+  --color-geel:           #f1ca13;   /* Conclusion Geel  | CMYK 0/20/100/0 */
+  --color-geel-10:        #fffae5;
+  --color-groen:          #529f45;   /* Conclusion Groen | CMYK 85/0/100/0 */
+  --color-groen-10:       #eef5ec;
+  --color-paars:          #5a3f8c;   /* Conclusion Paars | CMYK 75/85/0/0  */
+  --color-paars-10:       #eeecf3;
+
+  /* ----------------------------------------------------------
+     DOMEINKLEUREN — hoofdkleur + steunkleur per domein (p.16)
+     ---------------------------------------------------------- */
+  --domain-cloud-main:         var(--color-paars);
+  --domain-cloud-accent:       var(--color-geel);
+
+  --domain-business-main:      var(--color-groen);
+  --domain-business-accent:    var(--color-paars);
+
+  --domain-data-ai-main:       var(--color-rood);
+  --domain-data-ai-accent:     var(--color-blauw);
+
+  --domain-experience-main:    var(--color-blauw);
+  --domain-experience-accent:  var(--color-magenta);
+
+  --domain-enterprise-main:    var(--color-cyaan);
+  --domain-enterprise-accent:  var(--color-paars);
+
+  /* ----------------------------------------------------------
+     SEMANTISCHE KLEUREN (UI feedback)
+     ---------------------------------------------------------- */
+  --color-success:     var(--color-groen);
+  --color-success-bg:  var(--color-groen-10);
+  --color-warning:     var(--color-geel);
+  --color-warning-bg:  var(--color-geel-10);
+  --color-error:       var(--color-rood);
+  --color-error-bg:    var(--color-rood-10);
+  --color-info:        var(--color-blauw);
+  --color-info-bg:     var(--color-blauw-10);
+
+  /* ----------------------------------------------------------
+     TYPOGRAFIE
+     ---------------------------------------------------------- */
+
+  /* Online (web/apps): Montserrat — equivalent van Gotham (p.44) */
+  --font-heading:   'Montserrat', 'Arial Black', sans-serif;
+
+  /* Quotes & sierletters: Source Serif 4 (p.44) */
+  --font-serif:     'Source Serif 4', Georgia, serif;
+
+  /* Office / e-mail / fallback: Arial (p.45) */
+  --font-office:    Arial, Helvetica, sans-serif;
+
+  /* Gewichten */
+  --fw-light:    300;
+  --fw-regular:  400;
+  --fw-bold:     700;
+  --fw-black:    900;
+
+  /* Schaalverhouding — 1:0,875 (heading:body) conform brandguide p.43 */
+  --fs-display:  3.5rem;    /* grote hero-headings        */
+  --fs-h1:       2.5rem;    /* paginaniveau heading        */
+  --fs-h2:       2rem;
+  --fs-h3:       1.5rem;
+  --fs-h4:       1.25rem;
+  --fs-intro:    1.125rem;  /* intro/lead tekst           */
+  --fs-body:     1rem;      /* 16px base                  */
+  --fs-caption:  0.875rem;  /* bijschrift (ratio 1:0,875) */
+  --fs-small:    0.75rem;   /* labels, meta               */
+
+  /* Regelafstand — ratio 1:1,5 conform brandguide p.43 */
+  --lh-heading:  1.1;
+  --lh-intro:    1.4;
+  --lh-body:     1.5;
+
+  /* ----------------------------------------------------------
+     SPACING — gebaseerd op 5mm basisgrid (p.19)
+     ---------------------------------------------------------- */
+  --space-1:   0.25rem;   /*  4px */
+  --space-2:   0.5rem;    /*  8px */
+  --space-3:   0.75rem;   /* 12px */
+  --space-4:   1rem;      /* 16px */
+  --space-5:   1.25rem;   /* 20px */
+  --space-6:   1.5rem;    /* 24px */
+  --space-8:   2rem;      /* 32px */
+  --space-10:  2.5rem;    /* 40px */
+  --space-12:  3rem;      /* 48px */
+  --space-16:  4rem;      /* 64px */
+  --space-20:  5rem;      /* 80px */
+  --space-24:  6rem;      /* 96px */
+
+  /* ----------------------------------------------------------
+     LAYOUT
+     ---------------------------------------------------------- */
+  --container-max:      1280px;
+  --container-padding:  var(--space-8);
+  --grid-columns:       12;
+  --grid-gap:           var(--space-6);
+
+  /* Verticale lijn — stramien linker marge (p.18) */
+  --layout-margin-left: var(--space-8);
+
+  /* ----------------------------------------------------------
+     BORDER & RADIUS
+     ---------------------------------------------------------- */
+  --radius-sm:    2px;
+  --radius-md:    4px;
+  --radius-lg:    8px;
+  --radius-full:  9999px;
+
+  --border-width:  1px;
+  --border-color:  #e0e0e0;
+
+  /* ----------------------------------------------------------
+     SCHADUWEN
+     ---------------------------------------------------------- */
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.12);
+  --shadow-md:  0 4px 12px rgba(0,0,0,0.15);
+  --shadow-lg:  0 8px 24px rgba(0,0,0,0.18);
+
+  /* ----------------------------------------------------------
+     TRANSITIE
+     ---------------------------------------------------------- */
+  --transition-fast:  150ms ease;
+  --transition-base:  250ms ease;
+  --transition-slow:  400ms ease;
+}
+
+
+/* ============================================================
+   2. RESET & BASE
+   ============================================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-regular);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-zwart);
+  background-color: var(--color-wit);
+  -webkit-font-smoothing: antialiased;
+  text-align: left; /* Teksten zijn altijd linkslijdend — brandguide p.44 */
+}
+
+img, video, svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: var(--color-magenta);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-zwart);
+  text-decoration: underline;
+}
+
+
+/* ============================================================
+   3. TYPOGRAFIE
+   ============================================================ */
+
+/* Headings: Montserrat Bold/Black, UPPERCASE voor display */
+
+h1, .h1 {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-black);
+  font-size: var(--fs-h1);
+  line-height: var(--lh-heading);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+}
+
+h2, .h2 {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-black);
+  font-size: var(--fs-h2);
+  line-height: var(--lh-heading);
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+
+h3, .h3 {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-heading);
+}
+
+h4, .h4 {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-heading);
+}
+
+h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-body);
+}
+
+/* Display heading — grote hero-tekst */
+.text-display {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-black);
+  font-size: var(--fs-display);
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+}
+
+/* Intro/lead tekst — Montserrat Bold */
+.text-intro {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-intro);
+  line-height: var(--lh-intro);
+}
+
+/* Body tekst */
+p {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  margin-bottom: var(--space-4);
+}
+
+/* Bijschrift */
+.text-caption {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-body);
+  color: #555;
+}
+
+/* Source Serif 4 — quotes: altijd cursief (p.44) */
+blockquote,
+.text-quote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-intro);
+  color: var(--color-zwart);
+  border-left: 4px solid var(--color-magenta);
+  padding: var(--space-4) var(--space-6);
+  margin: var(--space-8) 0;
+}
+
+blockquote cite,
+.text-quote-author {
+  display: block;
+  font-family: var(--font-heading);
+  font-style: normal;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-magenta);
+  margin-top: var(--space-3);
+}
+
+/* Source Serif 4 Regular — decoratief element in heading */
+.text-serif {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: var(--fw-regular);
+}
+
+/* Accentkleur in heading (bijv. "BUSINESS DONE differently") */
+.text-accent {
+  color: var(--color-magenta);
+}
+
+/* Labels */
+.text-label {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-small);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+
+/* ============================================================
+   4. KLEUR UTILITY CLASSES
+   ============================================================ */
+
+/* Tekstkleuren */
+.text-magenta  { color: var(--color-magenta); }
+.text-rood     { color: var(--color-rood); }
+.text-cyaan    { color: var(--color-cyaan); }
+.text-blauw    { color: var(--color-blauw); }
+.text-geel     { color: var(--color-geel); }
+.text-groen    { color: var(--color-groen); }
+.text-paars    { color: var(--color-paars); }
+.text-wit      { color: var(--color-wit); }
+.text-zwart    { color: var(--color-zwart); }
+
+/* Achtergrondkleuren — volledig */
+.bg-zwart   { background-color: var(--color-zwart);   color: var(--color-wit); }
+.bg-wit     { background-color: var(--color-wit);     color: var(--color-zwart); }
+.bg-magenta { background-color: var(--color-magenta); color: var(--color-wit); }
+.bg-rood    { background-color: var(--color-rood);    color: var(--color-wit); }
+.bg-cyaan   { background-color: var(--color-cyaan);   color: var(--color-wit); }
+.bg-blauw   { background-color: var(--color-blauw);   color: var(--color-wit); }
+.bg-geel    { background-color: var(--color-geel);    color: var(--color-zwart); }
+.bg-groen   { background-color: var(--color-groen);   color: var(--color-wit); }
+.bg-paars   { background-color: var(--color-paars);   color: var(--color-wit); }
+
+/* Achtergrondkleuren — 10% tint (functioneel: badges, accenten) */
+.bg-magenta-10 { background-color: var(--color-magenta-10); color: var(--color-zwart); }
+.bg-rood-10    { background-color: var(--color-rood-10);    color: var(--color-zwart); }
+.bg-cyaan-10   { background-color: var(--color-cyaan-10);   color: var(--color-zwart); }
+.bg-blauw-10   { background-color: var(--color-blauw-10);   color: var(--color-zwart); }
+.bg-geel-10    { background-color: var(--color-geel-10);    color: var(--color-zwart); }
+.bg-groen-10   { background-color: var(--color-groen-10);   color: var(--color-zwart); }
+.bg-paars-10   { background-color: var(--color-paars-10);   color: var(--color-zwart); }
+
+
+/* ============================================================
+   5. LAYOUT — CONTAINER & GRID
+   ============================================================ */
+
+.container {
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-padding);
+}
+
+.container--narrow {
+  max-width: 800px;
+  margin-inline: auto;
+  padding-inline: var(--container-padding);
+}
+
+/* Basisgrid — 12 kolommen, 5mm-gebaseerd (p.19) */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-columns), 1fr);
+  gap: var(--grid-gap);
+}
+
+.grid--2 { grid-template-columns: repeat(2, 1fr); }
+.grid--3 { grid-template-columns: repeat(3, 1fr); }
+.grid--4 { grid-template-columns: repeat(4, 1fr); }
+
+/* Kolom-spans */
+.col-1  { grid-column: span 1; }
+.col-2  { grid-column: span 2; }
+.col-3  { grid-column: span 3; }
+.col-4  { grid-column: span 4; }
+.col-6  { grid-column: span 6; }
+.col-8  { grid-column: span 8; }
+.col-12 { grid-column: span 12; }
+
+/* Verticale lijn — stramien/margestartpunt (p.18) */
+.layout-vertical-line {
+  border-left: 3px solid var(--color-magenta);
+  padding-left: var(--layout-margin-left);
+}
+
+/* Section spacing */
+.section    { padding-block: var(--space-16); }
+.section--sm { padding-block: var(--space-8); }
+.section--lg { padding-block: var(--space-24); }
+
+
+/* ============================================================
+   6. COMPONENTEN
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   BUTTONS
+   ---------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-heading);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-body);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: var(--space-3) var(--space-6);
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+  white-space: nowrap;
+}
+
+.btn--primary {
+  background-color: var(--color-magenta);
+  color: var(--color-wit);
+  border-color: var(--color-magenta);
+}
+.btn--primary:hover {
+  background-color: transparent;
+  color: var(--color-magenta);
+  text-decoration: none;
+}
+
+.btn--secondary {
+  background-color: transparent;
+  color: var(--color-zwart);
+  border-color: var(--color-zwart);
+}
+.btn--secondary:hover {
+  background-color: var(--color-zwart);
+  color: var(--color-wit);
+  text-decoration: none;
+}
+
+/* Ghost — wit op donkere achtergrond */
+.btn--ghost {
+  background-color: transparent;
+  color: var(--color-wit);
+  border-color: var(--color-wit);
+}
+.btn--ghost:hover {
+  background-color: var(--color-wit);
+  color: var(--color-zwart);
+  text-decoration: none;
+}
+
+/* Cirkelvormige pijlknop — zoals op slides (p.10) */
+.btn--circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  border: 2px solid currentColor;
+  background: transparent;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+.btn--circle:hover {
+  background-color: currentColor;
+}
+
+.btn--sm { font-size: var(--fs-caption); padding: var(--space-2) var(--space-4); }
+.btn--lg { font-size: var(--fs-intro);   padding: var(--space-5) var(--space-10); }
+
+/* ----------------------------------------------------------
+   THEMABALK — de zwarte voet-/kopbalk met regenboog + pay-off
+   Brandguide p.10 & p.30
+   ---------------------------------------------------------- */
+
+.themabalk {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  background-color: var(--color-zwart);
+  color: var(--color-wit);
+  padding: var(--space-3) var(--space-6);
+  font-family: var(--font-heading);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  width: 100%;
+}
+
+/* Verticale kleurbalken (regenboog in logo — p.7) */
+.themabalk__rainbow {
+  display: flex;
+  gap: 2px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.themabalk__rainbow span {
+  display: block;
+  width: 4px;
+  height: 100%;
+}
+
+.themabalk__rainbow span:nth-child(1) { background: var(--color-rood); }
+.themabalk__rainbow span:nth-child(2) { background: var(--color-magenta); }
+.themabalk__rainbow span:nth-child(3) { background: var(--color-blauw); }
+.themabalk__rainbow span:nth-child(4) { background: var(--color-geel); }
+.themabalk__rainbow span:nth-child(5) { background: var(--color-groen); }
+.themabalk__rainbow span:nth-child(6) { background: var(--color-paars); }
+.themabalk__rainbow span:nth-child(7) { background: var(--color-cyaan); }
+
+.themabalk__payoff {
+  font-size: var(--fs-caption);
+  letter-spacing: 0.12em;
+}
+
+/* ----------------------------------------------------------
+   CARDS
+   ---------------------------------------------------------- */
+
+.card {
+  background-color: var(--color-wit);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: box-shadow var(--transition-base);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.card__image {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+}
+
+.card__body {
+  padding: var(--space-6);
+}
+
+.card__label {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-small);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-magenta);
+  margin-bottom: var(--space-2);
+}
+
+.card__title {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-black);
+  font-size: var(--fs-h4);
+  text-transform: uppercase;
+  line-height: var(--lh-heading);
+  margin-bottom: var(--space-3);
+}
+
+.card__text {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: #444;
+}
+
+.card--dark {
+  background-color: #1a1a1a;
+  color: var(--color-wit);
+  border-color: #333;
+}
+.card--dark .card__text { color: #ccc; }
+
+.card--magenta {
+  background-color: var(--color-magenta);
+  color: var(--color-wit);
+  border: none;
+}
+.card--magenta .card__label,
+.card--magenta .card__title { color: var(--color-wit); }
+
+/* ----------------------------------------------------------
+   BADGES / TAGS
+   ---------------------------------------------------------- */
+
+.badge {
+  display: inline-block;
+  font-family: var(--font-heading);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-small);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+}
+
+.badge--magenta { background-color: var(--color-magenta-10); color: var(--color-magenta); }
+.badge--rood    { background-color: var(--color-rood-10);    color: var(--color-rood); }
+.badge--cyaan   { background-color: var(--color-cyaan-10);   color: var(--color-cyaan); }
+.badge--blauw   { background-color: var(--color-blauw-10);   color: var(--color-blauw); }
+.badge--geel    { background-color: var(--color-geel-10);    color: #7a6300; }
+.badge--groen   { background-color: var(--color-groen-10);   color: var(--color-groen); }
+.badge--paars   { background-color: var(--color-paars-10);   color: var(--color-paars); }
+
+/* ----------------------------------------------------------
+   NAVIGATIE / HEADER
+   ---------------------------------------------------------- */
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--color-zwart);
+  padding: var(--space-4) var(--space-8);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--font-heading);
+  font-weight: var(--fw-black);
+  font-size: var(--fs-body);
+  letter-spacing: 0.15em;
+  color: var(--color-wit);
+  text-decoration: none;
+  text-transform: uppercase;
+  border: 1px solid var(--color-wit);
+  padding: var(--space-2) var(--space-4);
+}
+
+.nav__links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  list-style: none;
+}
+
+.nav__links a {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-wit);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.nav__links a:hover {
+  color: var(--color-magenta);
+  text-decoration: none;
+}
+
+/* ----------------------------------------------------------
+   HERO SECTIE
+   ---------------------------------------------------------- */
+
+.hero {
+  position: relative;
+  background-color: var(--color-zwart);
+  color: var(--color-wit);
+  min-height: 60vh;
+  display: flex;
+  align-items: flex-end;
+  padding: var(--space-16) var(--space-8);
+  overflow: hidden;
+}
+
+.hero--full { min-height: 100vh; }
+
+.hero__content {
+  position: relative;
+  z-index: 2;
+  max-width: 700px;
+}
+
+.hero__label {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-small);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--color-magenta);
+  margin-bottom: var(--space-4);
+}
+
+.hero__title {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-black);
+  font-size: clamp(2.5rem, 6vw, var(--fs-display));
+  text-transform: uppercase;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  margin-bottom: var(--space-6);
+}
+
+.hero__subtitle {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--fs-h3);
+  line-height: var(--lh-intro);
+  margin-bottom: var(--space-8);
+  color: var(--color-magenta);
+}
+
+/* ----------------------------------------------------------
+   FORMULIEREN
+   ---------------------------------------------------------- */
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+}
+
+label {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-zwart);
+}
+
+input[type="text"],
+input[type="email"],
+input[type="search"],
+input[type="password"],
+input[type="number"],
+textarea,
+select {
+  font-family: var(--font-heading);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-regular);
+  color: var(--color-zwart);
+  background-color: var(--color-wit);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  width: 100%;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+  outline: none;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--color-magenta);
+  box-shadow: 0 0 0 3px var(--color-magenta-10);
+}
+
+textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* ----------------------------------------------------------
+   TABELLEN
+   ---------------------------------------------------------- */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-body);
+}
+
+thead {
+  background-color: var(--color-zwart);
+  color: var(--color-wit);
+}
+
+th {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+}
+
+td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-color);
+}
+
+tbody tr:hover {
+  background-color: var(--color-magenta-10);
+}
+
+/* ----------------------------------------------------------
+   ALERTS / MELDINGEN
+   ---------------------------------------------------------- */
+
+.alert {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-md);
+  border-left: 4px solid;
+  font-size: var(--fs-body);
+  margin-bottom: var(--space-4);
+}
+
+.alert--info    { background: var(--color-blauw-10);  border-color: var(--color-blauw);  color: var(--color-blauw); }
+.alert--success { background: var(--color-groen-10);  border-color: var(--color-groen);  color: var(--color-groen); }
+.alert--warning { background: var(--color-geel-10);   border-color: var(--color-geel);   color: #7a6300; }
+.alert--error   { background: var(--color-rood-10);   border-color: var(--color-rood);   color: var(--color-rood); }
+
+/* ----------------------------------------------------------
+   DOMEINEN — kleurgecodeerde secties (p.15-16)
+   Gebruik: class="domain-card domain--cloud" etc.
+   ---------------------------------------------------------- */
+
+.domain--cloud      { --domain-color: var(--domain-cloud-main);      --domain-accent: var(--domain-cloud-accent); }
+.domain--business   { --domain-color: var(--domain-business-main);   --domain-accent: var(--domain-business-accent); }
+.domain--data-ai    { --domain-color: var(--domain-data-ai-main);    --domain-accent: var(--domain-data-ai-accent); }
+.domain--experience { --domain-color: var(--domain-experience-main); --domain-accent: var(--domain-experience-accent); }
+.domain--enterprise { --domain-color: var(--domain-enterprise-main); --domain-accent: var(--domain-enterprise-accent); }
+
+.domain-card {
+  background-color: var(--domain-color, var(--color-zwart));
+  color: var(--color-wit);
+  padding: var(--space-8);
+  position: relative;
+  overflow: hidden;
+}
+
+.domain-card__label {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-small);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: var(--space-2);
+  opacity: 0.8;
+}
+
+.domain-card__title {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-black);
+  font-size: var(--fs-h3);
+  text-transform: uppercase;
+  line-height: var(--lh-heading);
+}
+
+/* Steunkleur-blokje rechtsonder, zoals in brandguide p.15 */
+.domain-card__accent {
+  position: absolute;
+  bottom: var(--space-4);
+  right: var(--space-4);
+  width: 40px;
+  height: 40px;
+  background-color: var(--domain-accent, var(--color-magenta));
+}
+
+/* ----------------------------------------------------------
+   FOOTER
+   ---------------------------------------------------------- */
+
+.footer {
+  background-color: var(--color-zwart);
+  color: var(--color-wit);
+  padding: var(--space-12) var(--space-8) var(--space-6);
+}
+
+.footer__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-8);
+  margin-bottom: var(--space-12);
+}
+
+.footer__heading {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-magenta);
+  margin-bottom: var(--space-4);
+}
+
+.footer__links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.footer__links a {
+  font-size: var(--fs-caption);
+  color: #ccc;
+}
+
+.footer__links a:hover {
+  color: var(--color-magenta);
+  text-decoration: none;
+}
+
+.footer__bottom {
+  border-top: 1px solid #333;
+  padding-top: var(--space-6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--fs-small);
+  color: #888;
+}
+
+
+/* ============================================================
+   7. RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 1024px) {
+  :root {
+    --fs-display: 2.5rem;
+    --fs-h1:      2rem;
+  }
+  .grid--4       { grid-template-columns: repeat(2, 1fr); }
+  .footer__grid  { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --fs-display:         2rem;
+    --fs-h1:              1.75rem;
+    --fs-h2:              1.5rem;
+    --container-padding:  var(--space-5);
+  }
+  .grid, .grid--2, .grid--3, .grid--4 { grid-template-columns: 1fr; }
+  .col-1, .col-2, .col-3, .col-4,
+  .col-6, .col-8, .col-12             { grid-column: span 1; }
+  .nav__links  { display: none; }
+  .footer__grid { grid-template-columns: 1fr; }
+  .footer__bottom { flex-direction: column; gap: var(--space-3); text-align: center; }
+  .hero { min-height: 70vh; padding: var(--space-8) var(--space-5); }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --fs-display: 1.75rem;
+    --fs-h1:      1.5rem;
+  }
+  .btn--lg { font-size: var(--fs-body); padding: var(--space-4) var(--space-6); }
+}
+
+
+/* ============================================================
+   8. PRINT
+   ============================================================ */
+
+@media print {
+  .nav, .footer { display: none; }
+  body { font-size: 10pt; color: #000; }
+  a { color: #000; text-decoration: underline; }
+  .hero { min-height: auto; padding: 1cm; }
+}

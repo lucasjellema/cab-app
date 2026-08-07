@@ -1,0 +1,25 @@
+/* App-specific tweaks on top of conclusion-huisstijl CSS.css */
+
+.nav__logo-link {
+  display: flex;
+  align-items: center;
+}
+
+.nav__logo-img {
+  height: 32px;
+  width: auto;
+}
+
+.nav__auth {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.nav__username {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-caption);
+  color: var(--color-wit);
+  white-space: nowrap;
+}
