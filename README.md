@@ -2,8 +2,9 @@
 
 A static, no-build web app in the Conclusion house style. It shows a placeholder
 landing page and lets a user sign in with their Microsoft Conclusion (Entra ID)
-account. After sign-in, a reference markdown document is fetched from GitHub and
-held in memory for later use by the app.
+account. After sign-in, a reference markdown document is fetched from GitHub, and
+the app looks for a personal `<username>.json` document in a shared OneDrive
+folder — both are held in memory for later use by the app.
 
 ## Run it
 
@@ -26,14 +27,15 @@ styles.css                       small app-specific additions on top of the hous
 conclusion-huisstijl CSS.css     Conclusion brand stylesheet (design tokens, components)
 conclusion_rainb_rgb_logo.webp   Conclusion logo, shown in the header
 js/
-  app.js                         entry point — wires sign-in/sign-out and loads the guide doc
-  config.js                      EVENT_FEATURE_GUIDE_URL — source of the GitHub document
-  state.js                       shared in-memory state (currently just the loaded document)
+  app.js                         entry point — wires sign-in/sign-out and loads the guide + user doc
+  config.js                      EVENT_FEATURE_GUIDE_URL + ARCHITECTURE_BOARD_FOLDER_URL
+  state.js                       shared in-memory state (loaded documents)
   auth/
     authConfig.js                MSAL config: Entra ID app registration + requested scopes
     auth.js                      thin MSAL.js wrapper: initAuth/signIn/signOut/getAccount
   msgraph/
-    graph-client.js               loadDocumentFromURL() — fetches a doc from GitHub/OneDrive/plain URL
+    graph-client.js               loadDocumentFromURL(), listFolderContents(), readDocumentFromFolder(),
+                                   writeDocumentToFolder() — fetch/list/read/write against GitHub or a shared OneDrive folder
 ```
 
 ## Sign-in
@@ -44,11 +46,20 @@ tenant) lives in [`js/auth/authConfig.js`](js/auth/authConfig.js); update it to
 point at a different Entra ID tenant/app.
 
 Clicking **Log in** opens a popup sign-in window. On success, the user's display
-name appears in the header and the app automatically fetches the reference
-document configured in [`js/config.js`](js/config.js), storing its raw text in
-`state.eventFeatureGuide` for later use.
+name appears in the header and the app automatically:
 
-Sign-in is optional — the rest of the page works without it.
+- fetches the reference document configured in
+  [`js/config.js`](js/config.js) (`EVENT_FEATURE_GUIDE_URL`), storing its raw
+  text in `state.eventFeatureGuide`;
+- looks for a personal `<username>.json` file in the shared OneDrive folder
+  (`ARCHITECTURE_BOARD_FOLDER_URL`) and, if found, stores its parsed contents
+  in `state.userData`. Nothing happens if the file doesn't exist yet — that's
+  the normal case for most users.
+
+Sign-in is optional — the rest of the page works without it. Reading and
+writing files in the shared folder requires the `Files.ReadWrite` Graph scope
+(see [`js/auth/authConfig.js`](js/auth/authConfig.js)) and depends on the
+OneDrive sharing permissions set on that folder for the signed-in user.
 
 ## Further reading
 

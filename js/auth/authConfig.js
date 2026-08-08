@@ -46,9 +46,10 @@ export const msalConfig = {
  * By default, MSAL.js will add OIDC scopes (openid, profile, email) to any login request.
  * For more information about OIDC scopes, visit: 
  * https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-permissions-and-consent#openid-connect-scopes
- * Files.Read is required to read files from OneDrive or SharePoint via Microsoft Graph API.
+ * Files.ReadWrite is required to read and write files in OneDrive or SharePoint via Microsoft
+ * Graph API (superset of Files.Read — the app's writeDocumentToFolder() needs write access).
  */
 export const loginRequest = {
-      scopes: ["User.Read","openid","profile", "Files.Read"]
+      scopes: ["User.Read","openid","profile", "Files.ReadWrite"]
 }
 

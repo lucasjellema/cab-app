@@ -12,4 +12,14 @@ export const state = {
    * @type {string|null}
    */
   eventFeatureGuide: null,
+
+  /**
+   * Parsed contents of `<username>.json` from the shared OneDrive folder
+   * (config.js's ARCHITECTURE_BOARD_FOLDER_URL), loaded via
+   * msgraph/graph-client.js's readDocumentFromFolder() after a successful
+   * sign-in. Stays null until sign-in *and* the file is found — most users
+   * won't have one yet.
+   * @type {Object|null}
+   */
+  userData: null,
 };

@@ -1,13 +1,14 @@
 /**
  * app.js
  * Wires up Entra ID sign-in/sign-out and, after a successful sign-in,
- * retrieves the configured GitHub document into shared state.
+ * retrieves the configured GitHub document and the user's own OneDrive
+ * document (if any) into shared state.
  */
 
-import { EVENT_FEATURE_GUIDE_URL } from './config.js';
+import { EVENT_FEATURE_GUIDE_URL, ARCHITECTURE_BOARD_FOLDER_URL } from './config.js';
 import { state } from './state.js';
 import { initAuth, signIn, signOut, getAccount } from './auth/auth.js';
-import { loadDocumentFromURL } from './msgraph/graph-client.js';
+import { loadDocumentFromURL, readDocumentFromFolder } from './msgraph/graph-client.js';
 
 function wireAuth() {
   document.getElementById('login-btn').addEventListener('click', async () => {
@@ -40,6 +41,16 @@ function updateAuthUI(account) {
     loginBtn.style.display  = 'none';
     logoutBtn.style.display = '';
     loadDocumentFromURL(EVENT_FEATURE_GUIDE_URL, doc => { state.eventFeatureGuide = doc; });
+
+    const userFileName = `${account.username}.json`;
+    readDocumentFromFolder(ARCHITECTURE_BOARD_FOLDER_URL, userFileName, doc => {
+      if (doc == null) return; // no file for this user yet — not an error
+      try {
+        state.userData = JSON.parse(doc);
+      } catch (err) {
+        console.error(`Failed to parse ${userFileName}:`, err);
+      }
+    });
   } else {
     nameEl.style.display    = 'none';
     loginBtn.style.display  = '';

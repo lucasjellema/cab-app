@@ -2,7 +2,9 @@
 
 Static, no-build web app (HTML/CSS/vanilla JS ES modules). No framework, no
 bundler, no package.json. Currently a thin shell: branded landing page +
-Entra ID sign-in + fetch-and-stash of one reference document.
+Entra ID sign-in + fetch-and-stash of one reference GitHub document + a
+per-user JSON document read from (and, via a helper function, writable to) a
+shared OneDrive folder.
 
 ---
 
@@ -25,13 +27,14 @@ conclusion-huisstijl CSS.css     Conclusion brand stylesheet — tokens, compone
 conclusion_rainb_rgb_logo.webp   logo asset shown in the header
 js/
   app.js       entry point — wireAuth(), updateAuthUI(account), init(); no other modules import app.js
-  config.js    EVENT_FEATURE_GUIDE_URL const — single source of truth for the doc to fetch post-login
-  state.js     state object — currently just { eventFeatureGuide }
+  config.js    EVENT_FEATURE_GUIDE_URL + ARCHITECTURE_BOARD_FOLDER_URL consts — single source of truth for what gets fetched post-login
+  state.js     state object — { eventFeatureGuide, userData }
   auth/
     authConfig.js  msalConfig + loginRequest — Entra ID app registration (clientId, authority, scopes)
     auth.js        initAuth(), signIn(), signOut(), getAccount(), getAccessToken() — MSAL.js wrapper
   msgraph/
-    graph-client.js  loadDocumentFromURL(url, completionCallback) — GitHub/OneDrive/plain-URL fetch
+    graph-client.js  loadDocumentFromURL(), listFolderContents(), readDocumentFromFolder(),
+                     writeDocumentToFolder() — GitHub/OneDrive/plain-URL + shared-folder Graph calls
 ```
 
 **Dependency order (no circular imports):**
@@ -53,10 +56,9 @@ fully before/without sign-in.
 
 `js/auth/authConfig.js` — `msalConfig` (clientId, authority,
 `redirectUri: window.location.origin`, `cacheLocation: "sessionStorage"`) and
-`loginRequest` (`scopes: ["User.Read","openid","profile","Files.Read"]`). Edit
-this file to point at a different app registration/tenant. This is the same
-app registration used by the sibling `mjp-viewer` project — reuse it rather
-than registering a new one unless there's a reason to separate them.
+`loginRequest` (`scopes: ["User.Read","openid","profile","Files.ReadWrite"]`
+— `ReadWrite`, not just `Read`, because `writeDocumentToFolder()` needs write
+access). Edit this file to point at a different app registration/tenant.
 
 `js/auth/auth.js`:
 - `loadMsalScript()` — module-private; appends a `<script>` tag for
@@ -124,6 +126,57 @@ loadDocumentFromURL(EVENT_FEATURE_GUIDE_URL, doc => { state.eventFeatureGuide = 
 
 ---
 
+## Shared OneDrive folder & per-user document
+
+`config.js`'s `ARCHITECTURE_BOARD_FOLDER_URL` is a OneDrive/SharePoint share
+link to a folder (not a file). Three functions in
+`js/msgraph/graph-client.js` operate on it, all via the Graph `/shares/{id}`
+→ driveId/itemId resolution (factored into the module-private
+`resolveShareItem(url)` helper, shared with `loadDocumentFromURL`'s OneDrive
+branch):
+
+- **`listFolderContents(folderUrl, completionCallback)`** — lists the
+  folder's immediate children via `/drives/{driveId}/items/{itemId}/children`.
+  Calls back with `{ folders: [...], files: [...] }` (each entry has at least
+  `id`, `name`, `webUrl`).
+- **`readDocumentFromFolder(folderUrl, fileName, completionCallback)`** —
+  reads one named file from the folder via Graph's colon path syntax
+  (`/drives/{driveId}/items/{itemId}:/{fileName}:/content`). Calls back with
+  the file's text content, or **`null`** (not an error/alert) if the file
+  doesn't exist — Graph's `itemNotFound` / HTTP 404 is treated as an expected
+  "not found" outcome, since callers use this to probe for optional per-user
+  files.
+- **`writeDocumentToFolder(folderUrl, fileName, content, completionCallback?)`**
+  — creates or overwrites a named file in the folder (same colon path syntax,
+  `PUT .../content`). Requires the signed-in user to have write access to the
+  folder; requires the `Files.ReadWrite` scope (see Authentication above).
+  `completionCallback` is optional and receives the updated Graph driveItem
+  metadata.
+
+**Per-user document on sign-in** (`app.js`'s `updateAuthUI`): alongside the
+`EVENT_FEATURE_GUIDE_URL` fetch, it also probes the shared folder for a file
+named `${account.username}.json`:
+
+```js
+readDocumentFromFolder(ARCHITECTURE_BOARD_FOLDER_URL, `${account.username}.json`, doc => {
+  if (doc == null) return;           // no file for this user yet
+  state.userData = JSON.parse(doc);  // parse failures are logged, not surfaced to the user
+});
+```
+
+- **`state.userData`** (`state.js`) — `null` until sign-in *and* a matching
+  file is found; most users won't have one. Holds the **parsed** object (the
+  file is JSON), unlike `state.eventFeatureGuide` which stays raw text
+  (markdown). If you add a feature that writes user data back, call
+  `writeDocumentToFolder(ARCHITECTURE_BOARD_FOLDER_URL, \`${account.username}.json\`, JSON.stringify(state.userData), ...)`
+  — don't invent a second write path.
+- `ARCHITECTURE_BOARD_FOLDER_URL` in `config.js` points at a real shared
+  OneDrive folder (`conclusionfutureit-my.sharepoint.com/.../data`). Whether
+  a given signed-in user can read/write there depends on the sharing
+  permissions set on that folder in OneDrive, not on anything in this repo.
+
+---
+
 ## House style (`conclusion-huisstijl CSS.css`)
 
 Treat this file as a design-token library, not a place to add app-specific
@@ -167,3 +220,9 @@ do one without the other.
   additional properties on the existing `state` object (matching the
   `mjp-viewer` sibling project's pattern) rather than introducing new global
   state containers.
+- **OneDrive folder functions require an access token.** Unlike the plain
+  `fetch()` path in `loadDocumentFromURL`, everything in the "Shared OneDrive
+  folder" section goes through `auth.getAccessToken()` inside
+  `resolveShareItem()` — it silently proceeds with `token = null` if the user
+  isn't signed in (`getAccessToken()`'s documented behavior), which will then
+  fail Graph's auth check. Only call these after a successful sign-in.

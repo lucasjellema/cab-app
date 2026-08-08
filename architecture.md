@@ -10,13 +10,16 @@ The Conclusion Architecture Board is a **static, client-side web application**:
 plain HTML/CSS/JavaScript, no server-side component, no build pipeline, no
 package manager. It is currently a thin shell — a branded landing page plus
 Microsoft Entra ID sign-in — that establishes the foundations (styling,
-identity, a state container, and a data-fetch pattern) on which the actual
-Architecture Board functionality will be built.
+identity, a state container, and two data-fetch patterns: a public GitHub
+document, and a per-user JSON document read from — and, for authorized users,
+writable to — a shared OneDrive folder) on which the actual Architecture
+Board functionality will be built.
 
 The application is a sibling of an existing project, **mjp-viewer**, and
-deliberately reuses its patterns (module layout, `state.js` convention, and
-even its Entra ID app registration) so the two apps stay consistent and
-maintainable as a small family of related internal tools.
+deliberately reuses its patterns (module layout and the `state.js`
+convention) so the two apps stay consistent and maintainable as a small
+family of related internal tools. It has its own Entra ID app registration,
+separate from `mjp-viewer`'s.
 
 ## 2. Architecture style
 
@@ -47,16 +50,18 @@ flowchart TB
         CSS1[conclusion-huisstijl CSS.css<br/>brand tokens + components]
         CSS2[styles.css<br/>app-specific layout]
         APP[js/app.js<br/>entry point]
-        CFG[js/config.js<br/>EVENT_FEATURE_GUIDE_URL]
+        CFG[js/config.js<br/>EVENT_FEATURE_GUIDE_URL<br/>ARCHITECTURE_BOARD_FOLDER_URL]
         STATE[js/state.js<br/>in-memory state]
         AUTHCFG[js/auth/authConfig.js<br/>MSAL config]
         AUTH[js/auth/auth.js<br/>MSAL wrapper]
-        GRAPH[js/msgraph/graph-client.js<br/>document fetch]
+        GRAPH[js/msgraph/graph-client.js<br/>document + folder access]
     end
 
     MSAL[MSAL.js<br/>CDN: alcdn.msauth.net]
     ENTRA[Microsoft Entra ID<br/>login.microsoftonline.com]
     GH[GitHub raw content<br/>raw.githubusercontent.com]
+    GRAPHAPI[Microsoft Graph API<br/>graph.microsoft.com]
+    OD[Shared OneDrive folder<br/>conclusionfutureit-my.sharepoint.com]
 
     HTML --> APP
     HTML -.styled by.-> CSS1
@@ -69,6 +74,9 @@ flowchart TB
     AUTH -. lazy loads .-> MSAL
     AUTH <--> ENTRA
     GRAPH --> GH
+    GRAPH -- access token --> AUTH
+    GRAPH --> GRAPHAPI
+    GRAPHAPI --> OD
 ```
 
 **Module responsibilities**
@@ -78,12 +86,12 @@ flowchart TB
 | `index.html` | Structure only — header/logo, hero, about section, auth controls. No logic. |
 | `conclusion-huisstijl CSS.css` | Corporate design system: colors, type scale, spacing, reusable components (buttons, cards, nav). Treated as a vendored asset, not edited for app-specific needs. |
 | `styles.css` | Small, app-specific layout additions that sit on top of the house style. |
-| `js/app.js` | Composition root. Wires DOM event handlers to the auth module, drives the post-login document fetch, and is the only module that touches `document.*`. |
-| `js/config.js` | Static configuration — currently the URL of the one reference document the app consumes. |
+| `js/app.js` | Composition root. Wires DOM event handlers to the auth module, drives the post-login document + per-user file fetch, and is the only module that touches `document.*`. |
+| `js/config.js` | Static configuration — the URL of the public reference document, and the URL of the shared OneDrive folder used for per-user data. |
 | `js/state.js` | Single shared mutable state object, imported by reference (ES module live bindings) wherever shared state is needed. |
 | `js/auth/authConfig.js` | Entra ID app registration details (client ID, tenant/authority, requested scopes). The only file to change to point at a different tenant or app registration. |
 | `js/auth/auth.js` | Thin wrapper around MSAL.js: session restore, sign-in, sign-out, silent token acquisition. No DOM access — reusable in any future page. |
-| `js/msgraph/graph-client.js` | Generic "fetch a document from a URL" helper, with special-cased handling for GitHub blob URLs and OneDrive/SharePoint share URLs (via Microsoft Graph). |
+| `js/msgraph/graph-client.js` | Fetches a document from a plain/GitHub/OneDrive URL; also lists, reads, and writes files in a shared OneDrive folder via the Microsoft Graph `/shares` and `/drives` endpoints. |
 
 ## 4. Key flow: sign-in → document fetch
 
@@ -133,11 +141,45 @@ Notes:
   returns a truthy account — including a session silently restored from
   `sessionStorage` on page load, not only an explicit interactive sign-in.
 - The fetched document (`raw.githubusercontent.com/.../EVENT_FEATURE_GUIDE.md`)
-  is public; the fetch itself does not require an access token. The token
-  machinery in `graph-client.js` only activates for OneDrive/SharePoint URLs,
-  which this app does not currently use, but the helper is written generically
-  so switching the source document's location is a config change, not a code
-  change.
+  is public; the fetch itself does not require an access token.
+
+## 4a. Key flow: per-user document in the shared OneDrive folder
+
+Alongside the GitHub fetch, the same sign-in event triggers a lookup for a
+document private to that user, stored in a shared OneDrive folder:
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant Page as app.js
+    participant Graph as graph-client.js
+    participant GraphAPI as Microsoft Graph API
+    participant OD as Shared OneDrive folder
+
+    Note over Page: account becomes available (sign-in or restored session)
+    Page->>Graph: readDocumentFromFolder(ARCHITECTURE_BOARD_FOLDER_URL, "<username>.json")
+    Graph->>Graph: getAccessToken() (Files.ReadWrite scope)
+    Graph->>GraphAPI: GET /shares/{shareId}/driveItem
+    GraphAPI-->>Graph: driveId + itemId of the shared folder
+    Graph->>GraphAPI: GET /drives/{driveId}/items/{itemId}:/{username}.json:/content
+    alt file exists
+        GraphAPI->>OD: read file
+        OD-->>GraphAPI: file content
+        GraphAPI-->>Graph: 200 + content
+        Graph-->>Page: completionCallback(text)
+        Page->>Page: state.userData = JSON.parse(text)
+    else file does not exist yet
+        GraphAPI-->>Graph: 404 itemNotFound
+        Graph-->>Page: completionCallback(null)
+        Note over Page: state.userData stays null — not treated as an error
+    end
+```
+
+For a user with write access, the same folder can be written back to via
+`writeDocumentToFolder(ARCHITECTURE_BOARD_FOLDER_URL, "<username>.json", JSON.stringify(data))`
+— not currently wired to any UI action, but available as a building block for
+a future "save my data" feature. `listFolderContents()` similarly exists as a
+building block for a future folder browser and is not yet called from `app.js`.
 
 ## 5. Identity and security model
 
@@ -145,28 +187,30 @@ Notes:
   MSAL.js's `PublicClientApplication` (SPA / public client, popup flow — no
   client secret, appropriate for a browser-only app).
 - **Token cache**: `sessionStorage` (tab-scoped, cleared when the tab closes).
-- **Scopes requested**: `User.Read`, `openid`, `profile`, `Files.Read`. The
-  first three are used for basic sign-in and display name; `Files.Read` is
-  provisioned for the OneDrive/SharePoint fetch path in `graph-client.js`,
-  which is not exercised by the current single GitHub-hosted document but is
-  available for future document sources.
-- **What sign-in protects**: nothing, today. The page renders fully before
-  and without sign-in; the reference document lives at a public URL. Sign-in
-  currently serves to (a) identify the user in the UI and (b) gate *when* the
-  document fetch happens, not *whether* the content is accessible. **If a
-  future requirement needs actual access control** (e.g., a private document,
-  a write action, or per-user data), that requires either a backend that
-  validates the Entra ID token, or a genuinely access-controlled source
-  (e.g., a private repo accessed via a token-authenticated Graph/GitHub API
-  call) — a public `raw.githubusercontent.com` URL can never be truly
-  protected client-side.
-- **Shared app registration**: this app currently points at the same Entra ID
-  app registration (client ID `bee87c55-...`, tenant
-  `21429da9-...`) as the sibling `mjp-viewer` project. This is a conscious
-  reuse decision for a small internal tool family, not an accident — but it
-  means a change to that app registration's redirect URIs, scopes, or consent
-  requirements affects both apps. If the two apps diverge significantly in
-  purpose or audience, splitting the registration should be reconsidered.
+- **Scopes requested**: `User.Read`, `openid`, `profile`, `Files.ReadWrite`.
+  The first three are used for basic sign-in and display name;
+  `Files.ReadWrite` is required so `graph-client.js` can both read from and
+  write to the shared OneDrive folder on the user's behalf.
+- **What sign-in protects, for the GitHub document**: nothing. The page
+  renders fully before and without sign-in; the reference document lives at
+  a public URL. Sign-in there serves to (a) identify the user in the UI and
+  (b) gate *when* the fetch happens, not *whether* the content is accessible.
+- **What sign-in protects, for the OneDrive folder**: real access control,
+  delegated to OneDrive/SharePoint sharing permissions — not to any logic in
+  this app. `graph-client.js` always calls the Graph API with the signed-in
+  user's own delegated access token (`acquireTokenSilent`), so a user can
+  only read or write files in `ARCHITECTURE_BOARD_FOLDER_URL` to the extent
+  the folder is actually shared with them in OneDrive. The `<username>.json`
+  naming convention keeps each user's file logically separate, but it is
+  **not an enforced boundary** — anyone with write access to the folder can
+  read or overwrite any other user's file by name. That's an acceptable
+  trade-off for a small, trusted internal-tool folder; it would not be
+  appropriate if the folder ever holds sensitive per-user data or needs
+  per-file access control, which OneDrive folder-level sharing cannot express.
+- **Dedicated app registration.** This app has its own Entra ID app
+  registration (tenant `21429da9-...`, distinct from `mjp-viewer`'s), so its
+  redirect URIs and scope consent are managed independently. Recorded in
+  `js/auth/authConfig.js`.
 - **No secrets in the codebase.** The client ID and tenant ID are not secret
   (public client apps identify themselves this way by design); nothing in
   this repository should ever contain a client secret or access token.
@@ -185,8 +229,9 @@ bucket behind a CDN, or a simple web server) as long as:
    (e.g., `https://<something>.azurestaticapps.net`, a custom domain, and
    `http://localhost:*` for local development).
 3. Outbound requests to `alcdn.msauth.net` (MSAL CDN),
-   `login.microsoftonline.com` (Entra ID), and
-   `raw.githubusercontent.com` (document source) are not blocked by network
+   `login.microsoftonline.com` (Entra ID), `raw.githubusercontent.com`
+   (document source), `graph.microsoft.com` (Microsoft Graph), and
+   `*.sharepoint.com` (the shared OneDrive folder) are not blocked by network
    policy at the hosting or client-network level.
 
 There is currently no CI/CD pipeline, environment separation, or
