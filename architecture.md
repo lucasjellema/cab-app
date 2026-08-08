@@ -47,8 +47,8 @@ separate from `mjp-viewer`'s.
 flowchart TB
     subgraph Browser
         HTML[index.html<br/>page shell]
-        CSS1[conclusion-huisstijl CSS.css<br/>brand tokens + components]
-        CSS2[styles.css<br/>app-specific layout]
+        CSS1[css/conclusion-huisstijl CSS.css<br/>brand tokens + components]
+        CSS2[css/styles.css<br/>app-specific layout]
         APP[js/app.js<br/>entry point]
         CFG[js/config.js<br/>EVENT_FEATURE_GUIDE_URL<br/>ARCHITECTURE_BOARD_FOLDER_URL]
         STATE[js/state.js<br/>in-memory state]
@@ -84,8 +84,9 @@ flowchart TB
 | Module | Responsibility |
 |---|---|
 | `index.html` | Structure only — header/logo, hero, about section, auth controls. No logic. |
-| `conclusion-huisstijl CSS.css` | Corporate design system: colors, type scale, spacing, reusable components (buttons, cards, nav). Treated as a vendored asset, not edited for app-specific needs. |
-| `styles.css` | Small, app-specific layout additions that sit on top of the house style. |
+| `css/conclusion-huisstijl CSS.css` | Corporate design system: colors, type scale, spacing, reusable components (buttons, cards, nav). Treated as a vendored asset, not edited for app-specific needs. |
+| `css/styles.css` | Small, app-specific layout additions that sit on top of the house style. |
+| `images/` | Static image assets (currently just the Conclusion logo). |
 | `js/app.js` | Composition root. Wires DOM event handlers to the auth module, drives the post-login document + per-user file fetch, and is the only module that touches `document.*`. |
 | `js/config.js` | Static configuration — the URL of the public reference document, and the URL of the shared OneDrive folder used for per-user data. |
 | `js/state.js` | Single shared mutable state object, imported by reference (ES module live bindings) wherever shared state is needed. |
@@ -260,7 +261,7 @@ files to a host."
   reduce accidental complexity — `mjp-viewer` is a useful data point on how
   far the vanilla approach can be pushed before it gets unwieldy.
 - **The house style stylesheet is a shared brand asset.** Treat
-  `conclusion-huisstijl CSS.css` as read-mostly; app-specific styling belongs
-  in `styles.css`. If multiple internal apps end up sharing it, consider
-  hosting it centrally (e.g., a shared static asset URL) rather than copying
-  the file into each project, to avoid brand-update drift.
+  `css/conclusion-huisstijl CSS.css` as read-mostly; app-specific styling
+  belongs in `css/styles.css`. If multiple internal apps end up sharing it,
+  consider hosting it centrally (e.g., a shared static asset URL) rather than
+  copying the file into each project, to avoid brand-update drift.

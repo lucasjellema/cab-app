@@ -23,9 +23,11 @@ Then open `http://localhost:8000`.
 
 ```
 index.html                       page shell — header/logo, hero, about section, auth controls
-styles.css                       small app-specific additions on top of the house style
-conclusion-huisstijl CSS.css     Conclusion brand stylesheet (design tokens, components)
-conclusion_rainb_rgb_logo.webp   Conclusion logo, shown in the header
+css/
+  styles.css                       small app-specific additions on top of the house style
+  conclusion-huisstijl CSS.css     Conclusion brand stylesheet (design tokens, components)
+images/
+  conclusion_rainb_rgb_logo.webp   Conclusion logo, shown in the header
 js/
   app.js                         entry point — wires sign-in/sign-out and loads the guide + user doc
   config.js                      EVENT_FEATURE_GUIDE_URL + ARCHITECTURE_BOARD_FOLDER_URL
@@ -50,7 +52,7 @@ name appears in the header and the app automatically:
 
 - fetches the reference document configured in
   [`js/config.js`](js/config.js) (`EVENT_FEATURE_GUIDE_URL`), storing its raw
-  text in `state.eventFeatureGuide`;
+  text in `state.eventFeatureGuide`; note: this file is non-sensical and might not even exist; it is here just for demonstration purposes
 - looks for a personal `<username>.json` file in the shared OneDrive folder
   (`ARCHITECTURE_BOARD_FOLDER_URL`) and, if found, stores its parsed contents
   in `state.userData`. Nothing happens if the file doesn't exist yet — that's

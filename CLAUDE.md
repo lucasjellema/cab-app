@@ -22,9 +22,11 @@ modules require HTTP, not `file://`, in most browsers.
 
 ```
 index.html                       page shell — header (logo + auth controls), hero, about section
-styles.css                       app-specific additions layered on top of the house style
-conclusion-huisstijl CSS.css     Conclusion brand stylesheet — tokens, components (do not edit casually)
-conclusion_rainb_rgb_logo.webp   logo asset shown in the header
+css/
+  styles.css                       app-specific additions layered on top of the house style
+  conclusion-huisstijl CSS.css     Conclusion brand stylesheet — tokens, components (do not edit casually)
+images/
+  conclusion_rainb_rgb_logo.webp   logo asset shown in the header
 js/
   app.js       entry point — wireAuth(), updateAuthUI(account), init(); no other modules import app.js
   config.js    EVENT_FEATURE_GUIDE_URL + ARCHITECTURE_BOARD_FOLDER_URL consts — single source of truth for what gets fetched post-login
@@ -94,7 +96,7 @@ async function init() {
 **DOM elements** (`index.html`, inside `<header class="nav">`, in a
 `.nav__auth` wrapper): `#user-name` (span, hidden by default), `#login-btn`,
 `#logout-btn` (hidden by default). Styled via the house style's `.btn
-.btn--ghost .btn--sm` classes; layout tweaks in `styles.css`
+.btn--ghost .btn--sm` classes; layout tweaks in `css/styles.css`
 (`.nav__auth`, `.nav__username`).
 
 ---
@@ -177,10 +179,10 @@ readDocumentFromFolder(ARCHITECTURE_BOARD_FOLDER_URL, `${account.username}.json`
 
 ---
 
-## House style (`conclusion-huisstijl CSS.css`)
+## House style (`css/conclusion-huisstijl CSS.css`)
 
 Treat this file as a design-token library, not a place to add app-specific
-rules — put those in `styles.css` instead. Key primitives:
+rules — put those in `css/styles.css` instead. Key primitives:
 
 - CSS custom properties on `:root`: colors (`--color-*`), fonts
   (`--font-heading` = Montserrat, `--font-serif` = Source Serif 4), type scale
@@ -192,9 +194,9 @@ rules — put those in `styles.css` instead. Key primitives:
 
 The stylesheet's filename contains a literal space (`conclusion-huisstijl
 CSS.css`). `index.html` links it with the space percent-encoded
-(`href="conclusion-huisstijl%20CSS.css"`) — keep that encoding if you touch
-the `<link>` tag, or rename the file and update the link consistently, don't
-do one without the other.
+(`href="css/conclusion-huisstijl%20CSS.css"`) — keep that encoding if you
+touch the `<link>` tag, or rename the file and update the link consistently,
+don't do one without the other.
 
 ---
 
